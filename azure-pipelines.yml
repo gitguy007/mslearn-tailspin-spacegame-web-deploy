@@ -1,9 +1,17 @@
 trigger:
 - '*'
-#2021/07/18 : Added Functional UI Test and new service connection in Azure DevOps
+
 variables:
   buildConfiguration: 'Release'
-  dotnetSdkVersion: '5.x'
+  releaseBranchName: 'release'
+
+schedules:
+- cron: '0 3 * * *'
+  displayName: 'Deploy every day at 3 A.M.'
+  branches:
+    include:
+    - release
+  always: false 
 
 stages:
 - stage: 'Build'
@@ -69,6 +77,12 @@ stages:
 - stage: 'Dev'
   displayName: 'Deploy to the dev environment'
   dependsOn: Build
+  condition: |
+    and
+    (
+      succeeded(),
+      eq(variables['Build.SourceBranchName'], variables['releaseBranchName'])
+    )
   jobs:
   - deployment: Deploy
     pool:
@@ -85,13 +99,14 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game Functional UI'
+              azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameDev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
 - stage: 'Test'
   displayName: 'Deploy to the test environment'
   dependsOn: Dev
+  #condition: eq(variables['Build.Reason'], 'Schedule')
   jobs:
   - deployment: Deploy
     pool:
@@ -108,10 +123,10 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game Functional UI'
+              azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameTest)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-  - job: RunUITests
+- job: RunUITests
     dependsOn: Deploy
     displayName: 'Run UI tests'
     pool:
@@ -136,7 +151,6 @@ stages:
         arguments: '--no-build --configuration $(buildConfiguration)'
         publishTestResults: true
         projects: '$(System.DefaultWorkingDirectory)/**/*UITests.csproj'
-
 - stage: 'Staging'
   displayName: 'Deploy to the staging environment'
   dependsOn: Test
@@ -156,6 +170,6 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game Functional UI'
+              azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
