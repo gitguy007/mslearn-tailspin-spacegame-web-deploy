@@ -1,6 +1,6 @@
 trigger:
 - '*'
-
+# hardcoded library variable values
 variables:
   buildConfiguration: 'Release'
   dotnetSdkVersion: '5.x'
