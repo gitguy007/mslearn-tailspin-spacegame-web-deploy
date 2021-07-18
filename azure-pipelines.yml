@@ -1,6 +1,6 @@
 trigger:
 - '*'
-
+#2021/07/18 : Added Functional UI Test
 variables:
   buildConfiguration: 'Release'
   dotnetSdkVersion: '5.x'
