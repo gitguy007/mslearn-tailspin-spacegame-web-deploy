@@ -75,7 +75,7 @@ stages:
       vmImage: 'ubuntu-20.04'
     environment: dev
     variables:
-    - group: 'Release' #need to add single quote to run properly
+    - group: Release
     strategy:
       runOnce:
         deploy:
@@ -86,7 +86,8 @@ stages:
             displayName: 'Azure App Service Deploy: website'
             inputs:
               azureSubscription: 'Resource Manager - Tailspin - Space Game Functional UI'
-              appName: '$(WebAppNameDev)'
+              #appName: '$(WebAppNameDev)'
+              appName: 'tailspin-space-game-web-dev-7556'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
 - stage: 'Test'
@@ -109,7 +110,8 @@ stages:
             displayName: 'Azure App Service Deploy: website'
             inputs:
               azureSubscription: 'Resource Manager - Tailspin - Space Game Functional UI'
-              appName: '$(WebAppNameTest)'
+              #appName: '$(WebAppNameTest)'
+              appName: 'tailspin-space-game-web-test-7556'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
   - job: RunUITests
     dependsOn: Deploy
@@ -157,5 +159,6 @@ stages:
             displayName: 'Azure App Service Deploy: website'
             inputs:
               azureSubscription: 'Resource Manager - Tailspin - Space Game Functional UI'
-              appName: '$(WebAppNameStaging)'
+              #appName: '$(WebAppNameStaging)'
+              appName: 'tailspin-space-game-web-staging-7556'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
